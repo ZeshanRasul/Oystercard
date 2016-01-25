@@ -20,11 +20,37 @@ describe Oystercard do
     end
 
   end
+  describe 'journey' do
+    it 'in journey' do
+      expect(subject).not_to be_in_journey
+    end
+
+    it 'lets you touch in' do
+      subject.top_up 10
+      subject.touch_in
+      expect(subject).to be_in_journey
+    end
+
+    it 'lets you touch out' do
+      subject.top_up 10
+      subject.touch_in
+      subject.touch_out
+      expect(subject).not_to be_in_journey
+    end
+  end
 
   describe 'deduct method' do
     it 'deduct' do
       subject.top_up 50
       expect{ subject.deduct 50 }.to change{ subject.balance }.by -50
+    end
+  end
+
+  describe 'journey charge' do
+    it 'charges for your journey on touch out' do
+      subject.top_up 10
+      subject.touch_in
+      expect{ subject.touch_out }.to change{subject.balance}.by(-1)
     end
   end
 
