@@ -47,8 +47,8 @@ describe Oystercard do
       oystercard.top_up(topup_amount)
     end
 
-    it "touches in makes card in_journey" do
-      expect {oystercard.touch_in(station_in)}.to change(oystercard, :in_journey).from(false).to(true)
+    it "returns true to #in_journey when you touch in" do
+      expect {oystercard.touch_in(station_in)}.to change(oystercard, :in_journey?).from(false).to(true)
     end
 
     it "returns true when in_journey?" do
@@ -88,22 +88,38 @@ describe Oystercard do
 
   describe "#touch out" do
 
-    it "touches out makes card not in_journey" do
-      expect(oystercard.touch_out).not_to eq oystercard.in_journey
+    context "Changing card status to be not #in_journey?" do
+
+      before do
+        oystercard.top_up(topup_amount)
+        oystercard.touch_in(station_in)
+      end
+
+      it "returns false to #in_journey? when you touch in" do
+        expect {oystercard.touch_out}.to change(oystercard, :in_journey?).from(true).to(false)
+      end
+
+      it "return false when touched out" do
+        oystercard.touch_out
+        expect(oystercard.in_journey?).to be_falsey
+      end
+
+      it "deducts fare when touched out" do
+        expect {oystercard.touch_out}.to change(oystercard, :balance).by(-Oystercard::MINIMUM_FARE)
+      end
+
     end
 
-    it "return false when touched out" do
-      oystercard.touch_out
-      expect(oystercard.in_journey).to be_falsey
-    end
 
-    it "deducts fare when touched out" do
-      oystercard.top_up(topup_amount)
-      oystercard.touch_in(station_in)
-      expect {oystercard.touch_out}.to change(oystercard, :balance).by(-Oystercard::MINIMUM_FARE)
+    context "#touch_out will cause the entry station to be forgotten" do
+
+      it "Returns nil for station_in when touched out" do
+        oystercard.touch_out
+        expect(oystercard.station_in).to be_nil
+      end
+
     end
 
   end
-
 
 end
