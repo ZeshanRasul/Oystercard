@@ -1,14 +1,14 @@
 class Oystercard
 
-  attr_reader :balance, :max_balance, :status
+  attr_reader :balance, :in_journey
 
   DEFAULT_BALANCE = 0
   MAX_BALANCE = 90
+  MINIMUM_BALANCE = 1
 
   def initialize(balance=DEFAULT_BALANCE)
     @balance = balance
-    @max_balance = MAX_BALANCE
-    @status = :out_of_journey
+    @in_journey = false
   end
 
 
@@ -18,20 +18,20 @@ class Oystercard
   end
 
   def deduct(fare)
-    fail "Please top up your Oystercard" if top_up_needed?(fare)
     @balance -= fare
   end
 
   def touch_in
-    @status = :in_journey
+    fail "Please top up your Oystercard" if top_up_needed?
+    @in_journey = true unless in_journey?
   end
 
   def touch_out
-    @status = :out_of_journey
+    @in_journey = false if in_journey?
   end
 
   def in_journey?
-    @status == :in_journey ? true : false
+    @in_journey
   end
 
 private
@@ -40,8 +40,8 @@ private
     @balance + amount > MAX_BALANCE
   end
 
-  def top_up_needed?(fare)
-    @balance - fare < 0
+  def top_up_needed?
+    @balance <= MINIMUM_BALANCE
   end
 
 end
