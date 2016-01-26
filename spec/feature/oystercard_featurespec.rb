@@ -1,6 +1,7 @@
 require 'oystercard'
 
 describe 'feature_test' do
+
   it 'Tops up oystercard' do
     card = Oystercard.new
     amount = 20
@@ -10,29 +11,27 @@ describe 'feature_test' do
 
   it 'Stops you putting too much money on your card' do
     card = Oystercard.new
-    expect{card.top_up(Oystercard::MAX_BALANCE)}.to raise_error("Exceeded max balance of #{Oystercard::MAX_BALANCE}!")
+    expect{card.top_up(91)}.to raise_error("Exceeded max balance of #{Oystercard::MAX_BALANCE}!")
   end
 
   it 'deducts money from oystercard' do
     card = Oystercard.new
     fare = 2
-    card.top_up(amount)
-    expect(card.deduct(fare)).to eq 18
+    card.top_up(20)
+    expect(card.touch_out).to eq 19
   end
 
-  it 'deducts money from oystercard when touching out'
+  it 'deducts money from oystercard when touching out' do
     card = Oystercard.new
-    fare = 2
     station_in = :Peckham
     card.top_up(20)
     card.touch_in(station_in)
     card.touch_out
-    expect(card.balance).to eq 18
+    expect(card.balance).to eq 19
   end
 
-  it 'lets you retrieve the name of the station you touched in at'
+  it 'lets you retrieve the name of the station you touched in at' do
     card = Oystercard.new
-    fare = 2
     station_in = :Peckham
     card.top_up(20)
     card.touch_in(station_in)
