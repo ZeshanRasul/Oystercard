@@ -80,9 +80,10 @@ describe Oystercard do
       it "Will let you store the name of the station you touched in at" do
         oystercard.touch_in(station_in)
         expect(oystercard.station_in).to eq station_in
-      endgit
+      end
 
     end
+
   end
 
   describe "#touch out" do
