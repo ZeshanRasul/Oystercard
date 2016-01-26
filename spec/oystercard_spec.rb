@@ -6,6 +6,7 @@ describe Oystercard do
   let(:random_topup_amount) {rand(1..20)}
   let(:too_large_topup) {91}
   let(:station_in) { double :station}
+  let(:station_out) { double :station}
 
   describe "#initialize" do
 
@@ -16,6 +17,14 @@ describe Oystercard do
     end
 
     it {is_expected.to respond_to(:in_journey?)}
+
+    it 'has an empty list of journeys by default' do
+      expect(oystercard.journey_hist).to eq []
+    end
+
+    it 'has an empty hash to save current journey' do
+      expect(oystercard.this_journey).to eq ({})
+    end
 
   end
 
@@ -61,7 +70,7 @@ describe Oystercard do
       before do
         4.times do
           oystercard.touch_in(station_in)
-          oystercard.touch_out
+          oystercard.touch_out(station_out)
         end
       end
 
@@ -96,16 +105,16 @@ describe Oystercard do
       end
 
       it "returns false to #in_journey? when you touch in" do
-        expect {oystercard.touch_out}.to change(oystercard, :in_journey?).from(true).to(false)
+        expect {oystercard.touch_out(station_out)}.to change(oystercard, :in_journey?).from(true).to(false)
       end
 
       it "return false when touched out" do
-        oystercard.touch_out
+        oystercard.touch_out(station_out)
         expect(oystercard.in_journey?).to be_falsey
       end
 
       it "deducts fare when touched out" do
-        expect {oystercard.touch_out}.to change(oystercard, :balance).by(-Oystercard::MINIMUM_FARE)
+        expect {oystercard.touch_out(station_out)}.to change(oystercard, :balance).by(-Oystercard::MINIMUM_FARE)
       end
 
     end
@@ -114,12 +123,23 @@ describe Oystercard do
     context "#touch_out will cause the entry station to be forgotten" do
 
       it "Returns nil for station_in when touched out" do
-        oystercard.touch_out
+        oystercard.touch_out(station_out)
         expect(oystercard.station_in).to be_nil
       end
 
     end
 
   end
+
+  describe 'saving journey history' do
+    let(:journey) { {entry: station_in, exit: station_out}}
+    it 'saves one journey after touching in and out' do
+      oystercard.top_up 10
+      oystercard.touch_in(station_in)
+      oystercard.touch_out(station_out)
+      expect(oystercard.journey_hist).to include journey
+    end
+  end
+
 
 end

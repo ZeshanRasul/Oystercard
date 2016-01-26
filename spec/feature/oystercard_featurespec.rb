@@ -36,6 +36,12 @@ describe 'feature_test' do
     expect(card.station_in).to eq station_in
   end
 
-  it
+  it 'saves one journey history' do
+    card = Oystercard.new
+    station_in = :Peckham
+    station_out = :Aldgate
+    card.touch_in(station_in)
+    card.touch_out(station_out)
+    expect()
 
 end
