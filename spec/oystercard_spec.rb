@@ -5,7 +5,7 @@ describe Oystercard do
   let(:topup_amount) {5}
   let(:random_topup_amount) {rand(1..20)}
   let(:too_large_topup) {91}
-  let(:set_fare) {2}
+  let(:station_in) { double :station}
 
   describe "#initialize" do
 
@@ -41,20 +41,6 @@ describe Oystercard do
 
   end
 
-  describe "#deduct(fare)" do
-
-    it{is_expected.to respond_to(:deduct).with(1).argument}
-
-    before do
-      oystercard.top_up(topup_amount)
-    end
-
-    it "Will deduct the fare from the oystercard balance" do
-      expect(oystercard.deduct(set_fare)).to eq oystercard.balance
-    end
-
-  end
-
   describe "#touch_in" do
 
     before do
@@ -62,22 +48,38 @@ describe Oystercard do
     end
 
     it "touches in makes card in_journey" do
-      expect {oystercard.touch_in}.to change(oystercard, :in_journey).from(false).to(true)
+      expect {oystercard.touch_in(station_in)}.to change(oystercard, :in_journey).from(false).to(true)
     end
 
     it "returns true when in_journey?" do
-      oystercard.touch_in
+      oystercard.touch_in(station_in)
       expect(oystercard.in_journey?).to be_truthy
     end
 
     context "Cannot have less than £#{Oystercard::MINIMUM_BALANCE}" do
 
       before do
-        2.times {oystercard.deduct(set_fare)}
+        4.times do
+          oystercard.touch_in(station_in)
+          oystercard.touch_out
+        end
       end
 
       it "Will raise error 'Please top up your Oystercard'" do
-        expect {oystercard.touch_in}.to raise_error "Please top up your Oystercard"
+        expect {oystercard.touch_in(station_in)}.to raise_error "Please top up your Oystercard"
+      end
+
+    end
+
+    context "#touch_in remembers the station you touched in at" do
+
+      it "Will return name of station touched in at" do
+        expect(oystercard.touch_in(station_in)).to eq station_in
+      end
+
+      it "Will let you store the name of the station you touched in at" do
+        oystercard.touch_in(station_in)
+        expect(oystercard.station_in).to eq station_in
       end
 
     end
@@ -94,6 +96,13 @@ describe Oystercard do
       expect(oystercard.in_journey).to be_falsey
     end
 
+    it "deducts fare when touched out" do
+      oystercard.top_up(topup_amount)
+      oystercard.touch_in(station_in)
+      expect {oystercard.touch_out}.to change(oystercard, :balance).by(-Oystercard::MINIMUM_FARE)
+    end
+
   end
+
 
 end
