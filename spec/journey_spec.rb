@@ -13,6 +13,14 @@ describe Journey do
       expect(journey.in_journey).to eq false
     end
 
+    it 'has a default entry station of nil' do
+      expect(journey.entry_station).to eq nil
+    end
+
+    it 'has a default exit station of nil' do
+      expect(journey.exit_station).to eq nil
+    end
+
   end
 
 
@@ -100,9 +108,11 @@ describe Journey do
       journey_hash = {:start => 'Bank', :end => 'Angel'}
       journey.start_journey('Bank')
       journey.end_journey('Angel')
-      expect(journey.journey_complete).to eq journey_hash
+      expect(journey.journey_details).to eq journey_hash
     end
   end
+
+
 
     # describe '#journey complete' do
     #

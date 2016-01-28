@@ -1,17 +1,18 @@
 class Oystercard
 
-  attr_reader :balance, :station_in, :journey_hist, :this_journey
+  attr_reader :balance, :journey_hist, :this_journey
 
   DEFAULT_BALANCE = 0
   MAX_BALANCE = 90
   MINIMUM_BALANCE = 1
   MINIMUM_FARE = 1
+  PENALTY_FARE = 6
 
-  def initialize(balance=DEFAULT_BALANCE, journey = Journey.new)
+  def initialize(balance=DEFAULT_BALANCE, journey_klass = Journey)
     @balance = balance
-    @journey = journey
+    @journey_klass = journey_klass
     @journey_hist = []
-    @this_journey = {}
+    @this_journey = nil
   end
 
 
@@ -20,24 +21,30 @@ class Oystercard
     @balance += amount
   end
 
-  def touch_in(station_in)
+  def touch_in(station)
     fail "Please top up your Oystercard" if top_up_needed?
-
-    @station_in = station_in unless in_journey?
-    this_journey[:entry] = station_in
+    if @this_journey
+      @this_journey.start_journey(station)
+      add_to_journey
+      deduct(current_fare)
+      @this_journey = nil
+      touch_in(station)
+    else
+      @this_journey = @journey_klass.new
+      @this_journey.start_journey(station)
+    end
   end
 
-  def touch_out(station_out)
-    !!station_in if in_journey?
-    deduct(MINIMUM_FARE)
-    @station_in = nil
-    this_journey[:exit] = station_out
-    @journey_hist << this_journey
-    @this_journey = {}
-  end
-
-  def in_journey?
-    !!station_in
+  def touch_out(station)
+    if @this_journey == nil
+      @this_journey = @journey_klass.new
+      touch_out(station)
+    else
+      @this_journey.end_journey(station)
+      add_to_journey
+      deduct(current_fare)
+      @this_journey = nil
+    end
   end
 
 private
@@ -53,5 +60,16 @@ private
   def top_up_needed?
     @balance <= MINIMUM_BALANCE
   end
+
+  def add_to_journey
+    @journey_hist.push(@this_journey.journey_details)
+  end
+
+  def current_fare
+
+    @this_journey.journey_fare
+
+  end
+
 
 end
