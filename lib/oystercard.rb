@@ -7,8 +7,9 @@ class Oystercard
   MINIMUM_BALANCE = 1
   MINIMUM_FARE = 1
 
-  def initialize(balance=DEFAULT_BALANCE)
+  def initialize(balance=DEFAULT_BALANCE, journey = Journey.new)
     @balance = balance
+    @journey = journey
     @journey_hist = []
     @this_journey = {}
   end
@@ -21,6 +22,7 @@ class Oystercard
 
   def touch_in(station_in)
     fail "Please top up your Oystercard" if top_up_needed?
+
     @station_in = station_in unless in_journey?
     this_journey[:entry] = station_in
   end
