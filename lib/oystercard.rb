@@ -7,6 +7,8 @@ class Oystercard
   MINIMUM_BALANCE = 1
   MINIMUM_FARE = 1
   PENALTY_FARE = 6
+  MAX_BALANCE_ERROR = "Exceeded max balance of #{MAX_BALANCE}!"
+  TOP_UP_ERROR = "Please top up your Oystercard"
 
   def initialize(balance=DEFAULT_BALANCE, journey_klass = Journey)
     @balance = balance
@@ -17,12 +19,12 @@ class Oystercard
 
 
   def top_up(amount)
-    fail "Exceeded max balance of #{MAX_BALANCE}!" if max_balance?(amount)
+    fail MAX_BALANCE_ERROR if max_balance?(amount)
     @balance += amount
   end
 
   def touch_in(station)
-    fail "Please top up your Oystercard" if top_up_needed?
+    fail TOP_UP_ERROR if top_up_needed?
     if @this_journey
       @this_journey.start_journey(station)
       add_to_journey

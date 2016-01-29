@@ -9,14 +9,11 @@ class Journey
   end
 
   def start_journey(station)
-    if @in_journey == true
+    if @in_journey
       @entry_station = "no touch out"
       journey_complete
       @in_journey = false
     else
-      #legitimate journey, touch in, add entry_station to the
-      #current journey entry station
-      #and makes in journey true
       @entry_station = station
       @in_journey = true
     end
@@ -41,10 +38,12 @@ class Journey
   end
 
   def fare
-    if @in_journey == true
-      @journey_fare = Oystercard::PENALTY_FARE
-    else
-      @journey_fare = Oystercard::MINIMUM_FARE
-    end
+    # if @journey_details.has_value?('no touch in') || @journey_fare.has_value?('no touch out')
+    #   @journey_fare = Oystercard::PENALTY_FARE
+    # else
+    #   @journey_fare = Oystercard::MINIMUM_FARE
+    # end
+    @in_journey ? @journey_fare = Oystercard::PENALTY_FARE : @journey_fare = Oystercard::MINIMUM_FARE
   end
+
 end
